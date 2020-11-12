@@ -116,6 +116,11 @@ class AutoClearLagg extends PluginBase{
                 }
 
                 $this->seconds = $this->interval;
+                 foreach($this->getServer()->getOnlinePlayers() as $player){
+
+            $player->sendPopup("§cNext Clear Lag in §4" . $this->seconds . " §cseconds.");
+
+        }
             }else if(in_array($this->seconds, $this->broadcastTimes) && $this->messages[self::LANG_TIME_LEFT] !== ""){
                 $this->getServer()->broadcastMessage(str_replace("{SECONDS}", $this->seconds, $this->messages[self::LANG_TIME_LEFT]));
             }
