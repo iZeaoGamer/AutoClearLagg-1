@@ -132,8 +132,10 @@ class AutoClearLagg extends PluginBase{
 	 * @param string $entity
 	 */
 	public function exemptEntity(string $entityName): void {
-		$this->exemptEntities[strtolower($entityName)] = $entity;
-	}
+$this->getLogger()->notice("The entity {$entityName} is" . (!$this->isEntityExempted($entityName) ? " now" . : " no longer") . " exempted from clear lag!"); //todo rename those to debugs.	
+ 
+	    $this->exemptEntities[strtolower($entityName)] = $entity;
+   }
 
 	/**
 	 * @param string $entity
