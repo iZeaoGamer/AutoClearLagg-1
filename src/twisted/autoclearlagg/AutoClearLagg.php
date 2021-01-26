@@ -40,6 +40,7 @@ class AutoClearLagg extends PluginBase{
     private $messages;
     /** @var int[] */
     private $broadcastTimes;
+    protected $exemptEntities = [];
 
     public function onEnable() : void{
         $config = $this->getConfig()->getAll();
@@ -68,10 +69,14 @@ class AutoClearLagg extends PluginBase{
 
             return;
         }
-        $this->exemptEntities = array_map(function($entity) : string{
-            return strtolower((string) $entity);
-        }, $clear["exempt"] ?? []);
-
+        $entityCount = 0;
+        foreach($clear["exempt"] ?? [] as $entityName){
+        $this->exemptEntity($entityName);
+            $this->getLogger()->notice("The entity {$entityName} is now exempted from clear lag!"); //todo rename those to debugs.
+        $entityCount++;
+        }
+        $this->getLogger()->notice("Exempted {$entityCount} entities from lag clear!"); //todo rename those to debugs.
+        
         if(!is_array($config["messages"] ?? [])){
             $this->getLogger()->error("Config error: times attribute must an array");
             $this->getServer()->getPluginManager()->disablePlugin($this);
@@ -101,8 +106,9 @@ class AutoClearLagg extends PluginBase{
                             $entity->flagForDespawn();
                             ++$entitiesCleared;
                         }else if($this->clearMobs && $entity instanceof Creature && !$entity instanceof Human){
-                            if(!in_array(strtolower($entity->getName()), $this->exemptEntities)){
-                                $entity->flagForDespawn();
+                          //  if(!in_array(strtolower($entity->getName()), $this->exemptEntities)){
+                           if(!$this->isEntityExempted($entity->getName())){
+                            $entity->flagForDespawn();
                                 ++$entitiesCleared;
                             }
                         }else if($this->clearXpOrbs && $entity instanceof ExperienceOrb){
@@ -121,4 +127,20 @@ class AutoClearLagg extends PluginBase{
             }
         }), 20);
     }
+    /** for api purposes *//
+    /**
+	 * @param string $entity
+	 */
+	public function exemptEntity(string $entityName): void {
+		$this->exemptEntities[strtolower($entityName)] = $entity;
+	}
+
+	/**
+	 * @param string $entity
+	 *
+	 * @return bool
+	 */
+	public function isEntityExempted(string $entityName): bool {
+		return isset($this->exemptEntities[strtolower($entityName)]);
+	}
 }
